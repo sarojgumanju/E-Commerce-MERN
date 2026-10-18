@@ -2,6 +2,7 @@ import { fi } from "zod/v4/locales";
 import Product from "../models/Product.js";
 import uploadFile from "../utils/fileUploader.js";
 import { PRODUCT_DESCRIPTION_PROMPT } from "../constants/prompt.js";
+import promptAi from "../utils/ai.js";
 
 const getAllProducts = async (query) => {
   // console.log(query.sort);
