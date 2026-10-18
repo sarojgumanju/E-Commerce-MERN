@@ -40,6 +40,9 @@ app.use("/api/auth", authRoute);
 app.use("/api/orders", auth,  orderRoute);
 
 app.post("/api/ai", async (req, res) => {
+    console.log("AI route reached");
+    console.log("Request body:", req.body);
+
     try {
         const { prompt } = req.body;
 
@@ -50,23 +53,29 @@ app.post("/api/ai", async (req, res) => {
             });
         }
 
+        console.log("Calling Gemini API...");
+
         const result = await promptAi(prompt);
+
+        console.log("Gemini response received");
 
         return res.status(200).json({
             success: true,
             data: result,
         });
     } catch (error) {
-        console.error("AI Error:", error);
+        console.error("AI error message:", error?.message);
+        console.error("AI error stack:", error?.stack);
+        console.error("AI error status:", error?.status);
 
         return res.status(500).json({
             success: false,
-            message: "Failed to generate AI response.",
+            message: error?.message || "Failed to generate AI response.",
         });
     }
 });
 
-app.listen(() => {
+app.listen(config.port, config.hostname, () => {
     console.log(`Server is running at http://${config.hostname}:${config.port}`);
 });
 
