@@ -1,0 +1,45 @@
+import express from 'express';
+import dotenv from "dotenv";
+import multer from "multer";
+
+import productRoute from "./routes/product.route.js";
+import userRoute from "./routes/user.route.js"
+import authRoute from "./routes/auth.route.js"
+import orderRoute from "./routes/order.route.js";
+
+import config from "./config/config.js"
+import connectDB from "./config/database.js";
+import bodyParser from 'body-parser';
+import logger from './middlewares/logger.js';
+import auth from "./middlewares/auth.js"
+import connectCloudinary from './config/cloudinary.js';
+
+dotenv.config();
+
+const hostname = "127.0.0.1";
+const app = express();
+const upload = multer({ storage: multer.memoryStorage() });
+
+connectDB();
+connectCloudinary();
+
+app.use(express.json());
+app.use(bodyParser.json());
+app.use(logger);
+
+app.get("/", (req, res) => {
+    res.send("Hello world! I am Saroj Gumanju.");
+});
+
+app.use("/api/products", upload.array('images', 5), productRoute);
+
+app.use("/api/users", auth, upload.single("image"), userRoute);
+
+app.use("/api/auth", authRoute);
+
+app.use("/api/orders", auth,  orderRoute);
+
+app.listen(config.port, hostname, () => {
+    console.log(`Server is running at http://${hostname}:${config.port}`);
+});
+

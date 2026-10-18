@@ -1,0 +1,63 @@
+import express from "express";
+import roleBasedAuth from "../middlewares/roleBasedAuth.js";
+import {
+  ROLE_ADMIN,
+  ROLE_CUSTOMER,
+  ROLE_MERCHANT,
+} from "../constants/roles.js";
+import orderController from "../controllers/order.controller.js";
+import auth from "../middlewares/auth.js";
+
+const router = express.Router();
+
+router.get("/", roleBasedAuth(ROLE_ADMIN), orderController.getAllOrders);
+
+router.get(
+  "/user",
+  roleBasedAuth(ROLE_CUSTOMER),
+  orderController.getOrdersByUser,
+);
+
+router.get(
+  "/merchant",
+  roleBasedAuth(ROLE_MERCHANT),
+  orderController.getOrdersByMerchant,
+);
+
+router.get("/:id", orderController.getOrderById);
+
+router.post("/", roleBasedAuth(ROLE_CUSTOMER), orderController.createOrder);
+
+router.put(
+  "/:id/status",
+  roleBasedAuth(ROLE_ADMIN),
+  orderController.updateOrderStatus,
+);
+
+router.patch(
+  "/:id/cancel",
+  roleBasedAuth(ROLE_CUSTOMER),
+  orderController.cancelOrder,
+);
+
+router.patch(
+  "/:id/confirm",
+  roleBasedAuth(ROLE_CUSTOMER),
+  orderController.confirmOrder,
+);
+
+router.put(
+  "/:id/payment/cash",
+  roleBasedAuth(ROLE_CUSTOMER),
+  orderController.orderPaymentViaCash,
+);
+
+router.put(
+  "/:id/payment/khalti",
+  roleBasedAuth(ROLE_CUSTOMER),
+  orderController.orderPaymentViaKhalti
+)
+
+router.delete("/:id", roleBasedAuth(ROLE_ADMIN), orderController.deleteOrder);
+
+export default router;

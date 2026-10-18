@@ -1,0 +1,31 @@
+import * as z from "zod";
+import { emailRegex, passwordRegex } from "../../constants/regex.js";
+import { userSchema } from "./user.schema.js";
+
+export const loginSchema = z
+  .object({
+    email: z
+      .string({ error: "Email is required." })
+      .regex(emailRegex, { error: "Invalid email address." })
+      .optional(),
+    phone: z.string({ error: "Phone number is required." }).optional(),
+    password: z.string(),
+  })
+  .refine((data) => data.email || data.phone, {
+    message: "Either email or phone is required.",
+    path: ["email", "phone"],
+  });
+
+export const registerSchema = userSchema;
+
+export const forgotPasswordSchema = z.object({
+  email: z
+    .string({ error: "Email is required." })
+    .regex(emailRegex, { error: "Invalid email address." }),
+});
+
+export const resetPasswordSchema = z.object({
+  password: z.string(), 
+  userId: z.string(),
+  token: z.string()
+})
