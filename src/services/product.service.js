@@ -1,6 +1,7 @@
 import { fi } from "zod/v4/locales";
 import Product from "../models/Product.js";
 import uploadFile from "../utils/fileUploader.js";
+import { PRODUCT_DESCRIPTION_PROMPT } from "../constants/prompt.js";
 
 const getAllProducts = async (query) => {
   // console.log(query.sort);
@@ -63,7 +64,15 @@ const getProductById = async (id) => {
  
 const createProduct = async (data, files, userId) => {
   const uploadFiles = await uploadFile(files);
-  console.log(uploadFiles);
+
+  const promptMessage = PRODUCT_DESCRIPTION_PROMPT
+  .replace("%s", data.name)
+  .replace("%s", data.brand)
+  .replace("%s", data.category);
+  
+  const description = data.description ?? (await promptAi(promptMessage))
+
+  // console.log(uploadFiles);
 
   return await Product.create({
     ...data,
