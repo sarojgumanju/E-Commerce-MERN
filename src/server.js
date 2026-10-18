@@ -13,10 +13,10 @@ import bodyParser from 'body-parser';
 import logger from './middlewares/logger.js';
 import auth from "./middlewares/auth.js"
 import connectCloudinary from './config/cloudinary.js';
+import promptAi from './utils/ai.js';
 
 dotenv.config();
 
-const hostname = "127.0.0.1";
 const app = express();
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -39,7 +39,34 @@ app.use("/api/auth", authRoute);
 
 app.use("/api/orders", auth,  orderRoute);
 
-app.listen(config.port, hostname, () => {
-    console.log(`Server is running at http://${hostname}:${config.port}`);
+app.post("/api/ai", async (req, res) => {
+    try {
+        const { prompt } = req.body;
+
+        if (!prompt) {
+            return res.status(400).json({
+                success: false,
+                message: "Prompt is required.",
+            });
+        }
+
+        const result = await promptAi(prompt);
+
+        return res.status(200).json({
+            success: true,
+            data: result,
+        });
+    } catch (error) {
+        console.error("AI Error:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Failed to generate AI response.",
+        });
+    }
+});
+
+app.listen(() => {
+    console.log(`Server is running at http://${config.hostname}:${config.port}`);
 });
 

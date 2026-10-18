@@ -18,7 +18,7 @@ const productSchema = new mongoose.Schema({
         type: Number,
         required: [true, "Product price is required."],
         min: [1, "Price must be greater than 1"],
-        max: [300000, "Price must be less than Rs. 3,00,000"],
+        max: [500000, "Price must be less than Rs. 5,00,000"],
     },
     stock: {
         type: Number, 
