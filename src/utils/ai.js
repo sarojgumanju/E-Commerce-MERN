@@ -10,7 +10,7 @@ const promptAi = async (promptMessage) => {
     console.log("API key configured:", Boolean(config.geminiApiKey));
 
     const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
+        model: "gemini-3.8-flash",
         contents: promptMessage,
     });
 
