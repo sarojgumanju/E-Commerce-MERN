@@ -1,0 +1,48 @@
+<html>
+
+  <head>
+    <title>Products</title>
+    <style>
+      h1 {
+        color: red;
+      }
+      table, td{
+        border-collapse: collapse;
+        border: 1px solid black;
+      }
+      thead{
+        color: red;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1>Products.</h1>
+    <table>
+      <thead>
+        <tr>
+            <td>ID</td>
+            <td>Name</td>
+            <td>Brand</td>
+            <td>Category</td>
+            <td>Price</td>
+            <td>Images</td>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each products}}
+          <tr>
+            <td>{{_id}}</td>
+            <td>{{name}}</td>
+            <td>{{brand}}</td>
+            <td>{{category}}</td>
+            <td>{{price}}</td>
+            <td>{{imageUrls}}</td>
+            {{!-- <td>{{description}}</td> --}}
+          </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  </body>
+
+</html>

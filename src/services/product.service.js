@@ -7,9 +7,9 @@ import promptAi from "../utils/ai.js";
 const getAllProducts = async (query) => {
   // console.log(query.sort);
   // query.sort comes from the URL as a string, but Mongoose's .sort() expects a sort specification, such as an object.
-  const sort = query.sort ? JSON.parse(query.sort) : { price: 1 };
-  const limit = query.limit ?? 10;
-  const offset = query.offset ?? 0;
+  const sort = query?.sort ? JSON.parse(query.sort) : { price: 1 };
+  const limit = query?.limit ?? 10;
+  const offset = query?.offset ?? 0;
 
   const { category, brands, name, min, max, createdBy } = query;
 

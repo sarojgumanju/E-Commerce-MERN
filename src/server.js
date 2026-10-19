@@ -6,6 +6,7 @@ import productRoute from "./routes/product.route.js";
 import userRoute from "./routes/user.route.js"
 import authRoute from "./routes/auth.route.js"
 import orderRoute from "./routes/order.route.js";
+import pageRoute from "./routes/page.route.js";
 
 import config from "./config/config.js"
 import connectDB from "./config/database.js";
@@ -26,6 +27,8 @@ connectCloudinary();
 app.use(express.json());
 app.use(bodyParser.json());
 app.use(logger);
+
+app.set("view engine", "hbs");
 
 app.get("/", (req, res) => {
     res.send("Hello world! I am Saroj Gumanju.");
@@ -65,6 +68,8 @@ app.post("/api/ai", async (req, res) => {
         });
     }
 });
+
+app.use("/pages", pageRoute);
 
 app.listen(config.port, config.hostname, () => {
     console.log(`Server is running at http://${config.hostname}:${config.port}`);
