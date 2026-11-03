@@ -16,7 +16,7 @@ const auth = (req, res, next) => {
             success: false, 
             message: "user not authenticated."
         })
-    }
+    } 
 
     try {
         const data = jwt.verifyToken(token);

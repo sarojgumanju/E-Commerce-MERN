@@ -17,7 +17,7 @@ const register = async (data) => {
 
   delete data.roles;
 
-  const newUser = await User.create({
+  const newUser = await User.create({ 
     ...data,
     password: hashedPassword,
   });
