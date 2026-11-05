@@ -15,6 +15,7 @@ import logger from './middlewares/logger.js';
 import auth from "./middlewares/auth.js"
 import connectCloudinary from './config/cloudinary.js';
 import promptAi from './utils/ai.js';
+import cors from 'cors';
 
 dotenv.config();
 
@@ -24,6 +25,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 connectDB();
 connectCloudinary();
 
+app.use(cors());
 app.use(express.json());
 app.use(bodyParser.json());
 app.use(logger);
