@@ -86,7 +86,7 @@ const createProduct = async (data, files, userId) => {
 const updateProduct = async (id, input, files) => {
   const updatedData = input;
   
-  if(files && files.lenght > 0){
+  if(files && files.length > 0){
     const uploadFiles = await uploadFile(files);
     updatedData.imageUrls = uploadFiles.map((file) => file.url);
   }
