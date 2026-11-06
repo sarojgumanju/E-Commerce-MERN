@@ -97,8 +97,10 @@ const updateProduct = async (id, input, files) => {
 
 const deleteProduct = async (id, authUser) => {
   const product = await getProductById(id);
+  console.log(product.id);
+  console.log(authUser._id)
   if (
-    authUser._id !== product.createdBy &&
+    authUser._id !== product.createdBy.toString() &&
     !authUser.roles.includes(ROLE_ADMIN)
   ) {
     throw {
