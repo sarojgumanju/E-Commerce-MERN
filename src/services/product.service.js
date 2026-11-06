@@ -3,6 +3,7 @@ import Product from "../models/Product.js";
 import uploadFile from "../utils/fileUploader.js";
 import { PRODUCT_DESCRIPTION_PROMPT } from "../constants/prompt.js";
 import promptAi from "../utils/ai.js";
+import { ROLE_ADMIN } from "../constants/roles.js";
 
 const getAllProducts = async (query) => {
   // console.log(query.sort);
@@ -62,16 +63,15 @@ const getProductById = async (id) => {
   const product = await Product.findById(id);
   return product;
 };
- 
+
 const createProduct = async (data, files, userId) => {
   const uploadFiles = await uploadFile(files);
 
-  const promptMessage = PRODUCT_DESCRIPTION_PROMPT
-  .replace("%s", data.name)
-  .replace("%s", data.brand)
-  .replace("%s", data.category);
-  
-  const description = data.description ?? (await promptAi(promptMessage))
+  const promptMessage = PRODUCT_DESCRIPTION_PROMPT.replace("%s", data.name)
+    .replace("%s", data.brand)
+    .replace("%s", data.category);
+
+  const description = data.description ?? (await promptAi(promptMessage));
 
   // console.log(uploadFiles);
 
@@ -85,18 +85,27 @@ const createProduct = async (data, files, userId) => {
 
 const updateProduct = async (id, input, files) => {
   const updatedData = input;
-  
-  if(files && files.length > 0){
+
+  if (files && files.length > 0) {
     const uploadFiles = await uploadFile(files);
     updatedData.imageUrls = uploadFiles.map((file) => file.url);
   }
-  return await Product.findByIdAndUpdate(
-    id, 
-    updatedData,
-    {returnDocument: "after"});
+  return await Product.findByIdAndUpdate(id, updatedData, {
+    returnDocument: "after",
+  });
 };
 
-const deleteProduct = async (id) => {
+const deleteProduct = async (id, authUser) => {
+  const product = await getProductById(id);
+  if (
+    authUser._id !== product.createdBy &&
+    !authUser.roles.includes(ROLE_ADMIN)
+  ) {
+    throw {
+      status: 403,
+      message: "Access denied!",
+    };
+  }
   await Product.findByIdAndDelete(id);
 };
 
