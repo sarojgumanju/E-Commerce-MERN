@@ -7,7 +7,7 @@ async function uploadFile(files){
             cloudinary.uploader
             .upload_stream({
                 folder: '2026-10-15-MERN',
-                allowed_formats: ["jpg", "png", "webp", "avif"]
+                allowed_formats: ["jpg", "png", "webp", "avif", "jpeg"]
             },(error, data) => {
                 if(error) return reject(error);
 
