@@ -47,24 +47,58 @@ const getProductById = async (req, res) => {
   }
 };
 
+// const createProduct = async (req, res) => {
+//   const userId = req.user._id;
+//   // console.log(userId);
+
+//   const files = req.files;
+//   // console.log(files)
+
+//   try {
+//     const product = await productService.createProduct(req.body, files, userId);
+
+//     return res.status(201).json({
+//       success: true,
+//       message: "Product created successfully.",
+//       data: product,
+//     });
+//     // res.json(uploadedFiles);
+//   } catch (error) {
+//     return res.status(400).json({
+//       success: false,
+//       message: error.message || "Failed to create product.",
+//     });
+//   }
+// };
+
 const createProduct = async (req, res) => {
-  const userId = req.user._id;
-  // console.log(userId);
-
-  const files = req.files;
-  // console.log(files)
-
   try {
-    const product = await productService.createProduct(req.body, files, userId);
+    const userId = req.user?._id;
+    const files = req.files || [];
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized user.",
+      });
+    }
+
+    const product = await productService.createProduct(
+      req.body,
+      files,
+      userId
+    );
 
     return res.status(201).json({
       success: true,
       message: "Product created successfully.",
       data: product,
     });
-    res.json(uploadedFiles);
+
   } catch (error) {
-    return res.status(400).json({
+    console.error("CREATE PRODUCT ERROR:", error);
+
+    return res.status(500).json({
       success: false,
       message: error.message || "Failed to create product.",
     });
