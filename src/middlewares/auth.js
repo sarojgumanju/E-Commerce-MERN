@@ -4,7 +4,7 @@ const auth = (req, res, next) => {
   const authHeader = req.headers.authorization;
   let token;
   if (authHeader && authHeader.startsWith("Bearer ")) {
-    token = cookie.split(" ")[1];
+    token = authHeader.split(" ")[1];
   } else {
     const cookie = req.headers.cookie;
 
