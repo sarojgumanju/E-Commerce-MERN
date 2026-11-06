@@ -108,7 +108,7 @@ const deleteProduct = async (id, authUser) => {
       message: "Access denied!",
     };
   }
-  await Product.findByIdAndDelete(id);
+  return await Product.findByIdAndDelete(id);
 };
 
 const getBrands = async () => {

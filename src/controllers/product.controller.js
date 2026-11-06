@@ -125,7 +125,7 @@ const updateProduct = async (req, res) => {
       data: product,
     });
   } catch (error) {
-    return res.status(400).json({
+    return res.status(403).json({
       success: false,
       message: error.message || "Failed to update product.",
     });
