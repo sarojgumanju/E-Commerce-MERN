@@ -14,14 +14,14 @@ router.get("/", productController.getAllProducts);
 
 router.get(
   "/brands",
-  auth,
+  
   
   productController.getBrands,
 );
 
 router.get(
   "/categories",
-  auth,
+  
   
   productController.getCategories,
 );
