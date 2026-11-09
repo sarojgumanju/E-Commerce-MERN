@@ -15,14 +15,14 @@ router.get("/", productController.getAllProducts);
 router.get(
   "/brands",
   auth,
-  roleBasedAuth(ROLE_MERCHANT),
+  
   productController.getBrands,
 );
 
 router.get(
   "/categories",
   auth,
-  roleBasedAuth(ROLE_MERCHANT),
+  
   productController.getCategories,
 );
 
