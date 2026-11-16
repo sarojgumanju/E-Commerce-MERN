@@ -18,7 +18,7 @@ import mongoose from "mongoose";
 // for admin
 const getAllOrders = async () => {
   return await Order.find()
-    .sort({ createdAt: -1 })
+    .sort({ createdDate: -1 })
     .populate("orderItems.product", "name")
     .populate("user", "name");
 };
