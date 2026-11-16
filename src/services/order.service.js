@@ -102,7 +102,7 @@ const getOrdersByUser = async (userId) => {
   //console.log(userId);
   // { user: userId } means: "Find all orders where the user field equals userId."
   return await Order.find({ user: userId })
-    .sort({ createdAt: -1 })
+    .sort({ createdDate: -1 })
     .populate("user", "name email phone")
     .populate("orderItems.product", "name brand price imageUrls");
 };
