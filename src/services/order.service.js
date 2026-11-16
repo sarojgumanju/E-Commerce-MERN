@@ -59,10 +59,10 @@ const updateOrderStatus = async (id, status) => {
 const cancelOrder = async (id) => {
   return await Order.findByIdAndUpdate(
     id,
-    { status: ORDER_STATUS_CANCELED },
+    { orderStatus: ORDER_STATUS_CANCELED },
     { new: true },
   );
-};
+}; 
 
 const deleteOrder = async (id) => {
   await Order.findByIdAndDelete(id);
