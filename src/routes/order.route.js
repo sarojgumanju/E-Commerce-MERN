@@ -40,7 +40,7 @@ router.patch(
   orderController.cancelOrder,
 );
 
-router.patch(
+router.put(
   "/:id/confirm",
   roleBasedAuth(ROLE_CUSTOMER),
   orderController.confirmOrder,
