@@ -129,7 +129,7 @@ const confirmOrder = async (req, res) => {
 
 const getOrdersByUser = async (req, res) => {
     try {
-        const orders = await orderService.getOrdersByUser(req.user._id);
+        const orders = await orderService.getOrdersByUser(req.user._id, req.query?.status);
         return res.status(200).json({
             success: true, 
             message: "User's order retrieved",
