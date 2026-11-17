@@ -3,10 +3,10 @@ import config from "../config/config.js";
 
 const payViaKhalti = async (data) => {
   const body = {
-    return_url: config.khalti.returnUrl,
+    return_url: `${config.khalti.returnUrl}/${data.id}`,
     website_url: config.khalti.websiteUrl,
     amount: data.amount * 100,
-    purchase_order_id: data.purchaseOrderId,
+    purchase_order_id: data.purchaseOrderId, 
     purchase_order_name: data.purchaseOrderName,
     customer_info: data.customerInfo,
   };

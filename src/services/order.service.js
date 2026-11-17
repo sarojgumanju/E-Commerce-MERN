@@ -190,6 +190,7 @@ const orderPaymentViaKhalti = async (id) => {
     .populate("orderItems.product", "name");
 
   return await payViaKhalti({
+    id:id,
     amount: order.totalPrice,
     purchaseOrderId: order.orderNumber,
     purchaseOrderName: order.orderItems[0].product.name,
