@@ -101,7 +101,9 @@ const confirmOrder = async (id, status) => {
 const getOrdersByUser = async (userId, status) => {
   //console.log(userId);
   // { user: userId } means: "Find all orders where the user field equals userId."
-  return await Order.find({ user: userId, orderStatus: status })
+  const filter = {user: userId};
+  if(status) filter.orderStatus = status;
+  return await Order.find(filter)
     .sort({ createdDate: -1 })
     .populate("user", "name email phone")
     .populate("orderItems.product", "name brand price imageUrls");
