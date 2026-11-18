@@ -1,4 +1,5 @@
 import axios from "axios";
+import Stripe from "stripe";
 import config from "../config/config.js";
 
 const payViaKhalti = async (data) => {
@@ -6,7 +7,7 @@ const payViaKhalti = async (data) => {
     return_url: `${config.khalti.returnUrl}/${data.id}`,
     website_url: config.khalti.websiteUrl,
     amount: data.amount * 100,
-    purchase_order_id: data.purchaseOrderId, 
+    purchase_order_id: data.purchaseOrderId,
     purchase_order_name: data.purchaseOrderName,
     customer_info: data.customerInfo,
   };
@@ -21,10 +22,31 @@ const payViaKhalti = async (data) => {
     return response.data;
   } catch (error) {
     console.error("Khalti error:", error.response?.data);
-      console.error("Khalti error body:", JSON.stringify(error.response?.data, null, 2));
+    console.error(
+      "Khalti error body:",
+      JSON.stringify(error.response?.data, null, 2),
+    );
 
     throw error;
   }
 };
 
-export default payViaKhalti;
+const payViaStripe = async (data) => {
+  const stripe = new Stripe(config.stripeSecretKey)
+
+  const paymentIntent = await stripe.paymentIntents.create({
+    amount: data.amount,
+    currency: data.currency || "npr",
+    metadata: {
+      customer_email: data.customer.email,
+      customer_phone: data.customer.phone,
+      customer_name: data.customer.name,
+      order_id: data.orderId,
+      order_name: data.orderName,
+    }
+  });
+
+  return paymentIntent;
+};
+
+export { payViaKhalti, payViaStripe };

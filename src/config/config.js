@@ -21,6 +21,7 @@ const config = {
         websiteUrl: process.env.KHALTI_WEBSITE_URL || "",
         appUrl: process.env.KHALTI_APP_URL || "",
     },
+    stripeSecretKey: process.env.STRIPE_SECRET_KEY || "", 
     resendEmailApiKey : process.env.RESEND_EMAIL_API_KEY || "",
     geminiApiKey : process.env.GEMINI_API_KEY,
 };

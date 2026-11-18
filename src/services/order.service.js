@@ -5,6 +5,7 @@ import {
 } from "../constants/orderStatus.js";
 import Payment from "../models/Payment.js";
 import {
+  PAYMENT_METHOD_CARD,
   PAYMENT_METHOD_CASH,
   PAYMENT_METHOD_ONLINE,
   PAYMENT_STATUS_FAILED,
@@ -204,6 +205,32 @@ const orderPaymentViaKhalti = async (id) => {
   });
 };
 
+
+const orderPaymentViaStripe = async (id) => {
+  const order = await getOrderById(id);
+  const orderPayment = await Payment.create({
+    method: PAYMENT_METHOD_CARD,
+    amount: order.totalPrice,
+  });
+
+  await Order.findByIdAndUpdate(id, {
+    payment: orderPayment.id,
+  })
+    .populate("payment", "method amount paymentStatus")
+    .populate("orderItems.product", "name");
+
+  return await payViaStripe({
+    amount: order.totalPrice,
+    orderId: order.orderNumber,
+    orderName: order.orderItems[0].product.name,
+    customer: {
+      name: order.user.name,
+      email: order.user.email,
+      phone: order.user.phone,
+    },
+  });
+};
+
 export default {
   getAllOrders,
   getOrderById,
@@ -216,4 +243,5 @@ export default {
   getOrdersByUser,
   orderPaymentViaCash,
   orderPaymentViaKhalti,
+  orderPaymentViaStripe
 };
