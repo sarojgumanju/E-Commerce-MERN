@@ -35,7 +35,7 @@ const payViaStripe = async (data) => {
   const stripe = new Stripe(config.stripeSecretKey)
 
   const paymentIntent = await stripe.paymentIntents.create({
-    amount: data.amount,
+    amount: Math.round(data.amount * 100),
     currency: data.currency || "npr",
     metadata: {
       customer_email: data.customer.email,
