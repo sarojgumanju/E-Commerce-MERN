@@ -11,7 +11,8 @@ import {
   PAYMENT_STATUS_FAILED,
   PAYMENT_STATUS_SUCCESS,
 } from "../constants/payment.js";
-import payViaKhalti from "../utils/payment.js";
+import {payViaKhalti, payViaStripe } from "../utils/payment.js";
+ 
 import User from "../models/User.js";
 import userService from "./user.service.js";
 import mongoose from "mongoose";

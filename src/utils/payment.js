@@ -49,4 +49,4 @@ const payViaStripe = async (data) => {
   return paymentIntent;
 };
 
-export default { payViaKhalti, payViaStripe };
+export  { payViaKhalti, payViaStripe };
