@@ -11,19 +11,89 @@ import {
   PAYMENT_STATUS_FAILED,
   PAYMENT_STATUS_SUCCESS,
 } from "../constants/payment.js";
-import {payViaKhalti, payViaStripe } from "../utils/payment.js";
- 
+import { payViaKhalti, payViaStripe } from "../utils/payment.js";
+
 import User from "../models/User.js";
 import userService from "./user.service.js";
 import mongoose from "mongoose";
 
 // for admin
+
 const getAllOrders = async () => {
-  return await Order.find()
-    .sort({ createdDate: -1 })
-    .populate("orderItems.product", "name")
-    .populate("user", "name");
+  return await Order.aggregate([
+    {
+      $lookup: {
+        from: "users",
+        localField: "user",
+        foreignField: "_id",
+        as: "user",
+      },
+    },
+    {
+      $unwind: "$user",
+    },
+    {
+      $lookup: {
+        from: "products",
+        localField: "orderItems.product",
+        foreignField: "_id",
+        as: "products",
+      },
+    },
+    {
+      $addFields: {
+        orderItems: {
+          $map: {
+            input: "$orderItems",
+            as: "item",
+            in: {
+              $mergeObjects: [
+                "$$item",
+                {
+                  product: {
+                    $arrayElemAt: [
+                      {
+                        $filter: {
+                          input: "$products",
+                          as: "product",
+                          cond: {
+                            $eq: [
+                              "$$product._id",
+                              "$$item.product",
+                            ],
+                          },
+                        },
+                      },
+                      0,
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        },
+      },
+    },
+    {
+      $project: {
+        orderNumber: 1,
+        payment: 1,
+        shippingAddress: 1,
+        orderStatus: 1,
+        orderItems: 1,
+        totalPrice: 1,
+        createdDate:1,
+        user: {
+          _id: 1,
+          name: 1,
+          email: 1,
+          phone: 1,
+        },
+      },
+    },
+  ]);
 };
+
 
 const getOrderById = async (id) => {
   const order = await Order.findById(id)
@@ -44,18 +114,22 @@ const createOrder = async (data, authUser) => {
   console.log(authUser._id);
   const user = await userService.getUserById(authUser._id, authUser);
 
-  if(!data.shippingAddress){
+  if (!data.shippingAddress) {
     data.shippingAddress = user.address;
   }
 
-  data.orderNumber = crypto.randomUUID(); // data ko orderNumber ma crypto.randomUUID() 
+  data.orderNumber = crypto.randomUUID(); // data ko orderNumber ma crypto.randomUUID()
   // const orderNumber = crypto.randomUUID();
 
-  return await Order.create({ ...data, user: authUser._id});
+  return await Order.create({ ...data, user: authUser._id });
 };
 
 const updateOrderStatus = async (id, status) => {
-  return await Order.findByIdAndUpdate(id, { status }, {returnDocument: "after"});
+  return await Order.findByIdAndUpdate(
+    id,
+    { orderStatus: status },
+    { returnDocument: "after" },
+  );
 };
 
 const cancelOrder = async (id) => {
@@ -64,7 +138,7 @@ const cancelOrder = async (id) => {
     { orderStatus: ORDER_STATUS_CANCELED },
     { new: true },
   );
-}; 
+};
 
 const deleteOrder = async (id) => {
   await Order.findByIdAndDelete(id);
@@ -83,7 +157,7 @@ const confirmOrder = async (id, status) => {
 
     throw {
       status: 400,
-      message: "Payment failed."
+      message: "Payment failed.",
     };
   }
 
@@ -96,47 +170,92 @@ const confirmOrder = async (id, status) => {
   return await Order.findByIdAndUpdate(
     id,
     { orderStatus: ORDER_STATUS_CONFIRMED },
-    {returnDocument: "after"},
+    { returnDocument: "after" },
   ).populate("payment", "paymentStatus");
 };
 
 const getOrdersByUser = async (userId, status) => {
   //console.log(userId);
   // { user: userId } means: "Find all orders where the user field equals userId."
-  const filter = {user: userId};
-  if(status) filter.orderStatus = status;
+  const filter = { user: userId };
+  if (status) filter.orderStatus = status;
   return await Order.find(filter)
     .sort({ createdDate: -1 })
     .populate("user", "name email phone")
     .populate("orderItems.product", "name brand price imageUrls");
 };
 
+
 const getOrdersByMerchant = async (merchantId) => {
-  console.log(merchantId);
   return await Order.aggregate([
     {
       $lookup: {
         from: "users",
         localField: "user",
         foreignField: "_id",
-        as: "orderUser",
-      }
-    }, 
+        as: "user",
+      },
+    },
+    {
+      $unwind: "$user",
+    },
     {
       $lookup: {
         from: "products",
         localField: "orderItems.product",
         foreignField: "_id",
-        as: "orderedProducts",
-      }
-    }, 
+        as: "products",
+      },
+    },
     {
-      $unwind: "$orderUser"
+      $addFields: {
+        orderItems: {
+          $filter: {
+            input: {
+              $map: {
+                input: "$orderItems",
+                as: "item",
+                in: {
+                  $mergeObjects: [
+                    "$$item",
+                    {
+                      product: {
+                        $arrayElemAt: [
+                          {
+                            $filter: {
+                              input: "$products",
+                              as: "product",
+                              cond: {
+                                $eq: [
+                                  "$$product._id",
+                                  "$$item.product",
+                                ],
+                              },
+                            },
+                          },
+                          0,
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            as: "item",
+            cond: {
+              $eq: [
+                "$$item.product.createdBy",
+                new mongoose.Types.ObjectId(merchantId),
+              ],
+            },
+          },
+        },
+      },
     },
     {
       $match: {
-        "orderedProducts.createdBy": new mongoose.Types.ObjectId(merchantId)
-      }
+        "orderItems.0": { $exists: true },
+      },
     },
     {
       $project: {
@@ -146,20 +265,18 @@ const getOrdersByMerchant = async (merchantId) => {
         orderStatus: 1,
         orderItems: 1,
         totalPrice: 1,
-        "orderUser.name": 1,
-        "orderUser.email": 1,
-        "orderUser.phone": 1,
-        "orderedProducts._id": 1,
-        "orderedProducts.name": 1,
-        "orderedProducts.brand": 1,
-        "orderedProducts.category": 1,
-        "orderedProducts.price": 1,
-        "orderedProducts.imageUrl": 1,
-
-      }
-    }
+        createdDate:1,
+        user: {
+          _id: 1,
+          name: 1,
+          email: 1,
+          phone: 1,
+        },
+      },
+    },
   ]);
 };
+
 
 const orderPaymentViaCash = async (id) => {
   const order = await getOrderById(id);
@@ -174,11 +291,11 @@ const orderPaymentViaCash = async (id) => {
       orderStatus: ORDER_STATUS_CONFIRMED,
       payment: orderPayment.id,
     },
-    {returnDocument: "after"},
+    { returnDocument: "after" },
   )
     .populate("payment", "method amount paymentStatus")
     .populate("orderItems.product", "name");
-}; 
+};
 
 const orderPaymentViaKhalti = async (id) => {
   const order = await getOrderById(id);
@@ -194,7 +311,7 @@ const orderPaymentViaKhalti = async (id) => {
     .populate("orderItems.product", "name");
 
   return await payViaKhalti({
-    id:id,
+    id: id,
     amount: order.totalPrice,
     purchaseOrderId: order.orderNumber,
     purchaseOrderName: order.orderItems[0].product.name,
@@ -205,7 +322,6 @@ const orderPaymentViaKhalti = async (id) => {
     },
   });
 };
-
 
 const orderPaymentViaStripe = async (id) => {
   const order = await getOrderById(id);
@@ -244,5 +360,5 @@ export default {
   getOrdersByUser,
   orderPaymentViaCash,
   orderPaymentViaKhalti,
-  orderPaymentViaStripe
+  orderPaymentViaStripe,
 };
